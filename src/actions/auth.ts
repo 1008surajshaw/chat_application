@@ -20,9 +20,10 @@ export const syncUserProfile = async (session: Session): Promise<boolean> => {
     
     if (!user) {
       console.error('No user in session');
+      
       return false;
     }
-
+    
     const { error } = await supabase.from('profiles').upsert({
       id: user.id,
       email: user.email,
@@ -121,10 +122,7 @@ export const updateUserProfile = async (
   }
 };
 
-/**
- * Sign out the current user
- * @returns Success status
- */
+
 export const signOutUser = async (): Promise<boolean> => {
   try {
     const { error } = await supabase.auth.signOut();

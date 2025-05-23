@@ -4,6 +4,7 @@ import { X, Bell, Lock, Clock, ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
+import Image from "next/image"
 
 interface ProfilePanelProps {
   onClose: () => void
@@ -24,7 +25,7 @@ export default function ProfilePanel({ onClose }: ProfilePanelProps) {
       <div className="flex-1 overflow-y-auto">
         <div className="flex flex-col items-center p-6 bg-background">
           <Avatar className="h-32 w-32 mb-4">
-            <img src="/placeholder.svg?height=128&width=128" alt="Profile" />
+            <Image src="/placeholder.svg?height=128&width=128" alt="Profile" width={128} height={128} />
           </Avatar>
           <h2 className="text-xl font-semibold">Test El Centro</h2>
           <p className="text-sm text-muted-foreground">+1 98765 43210</p>

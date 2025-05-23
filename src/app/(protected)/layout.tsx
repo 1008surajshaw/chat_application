@@ -1,7 +1,7 @@
 'use client';
 
 import { type ReactNode, useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { redirect } from "next/navigation"
 import { useAuth } from "@/providers/auth-provider"
 import { 
   Home, 
@@ -24,26 +24,32 @@ import { usePathname } from "next/navigation"
 import { FullPageLoader } from "@/components/ui/loading"
 import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react"
+import { FullScreenSkeleton } from "@/components/ui/skeletons/full-screen-skeleton";
 
 interface DashboardLayoutProps {
   children: ReactNode
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { isLoading , signOut } = useAuth()
+  const { user, isLoading, signOut } = useAuth()
+  
   const { theme, setTheme } = useTheme();
-  const router = useRouter()
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  if(isLoading) {
-    return <FullPageLoader/>
-  }
   
+  if(isLoading) {
+    return <FullScreenSkeleton />
+  }
+
+  if (!user && !isLoading) {
+    redirect("/")
+    
+  }
+
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
@@ -62,187 +68,190 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   })()
   
   const handleTabClick = (tab: string, path: string = `/${tab}`) => {
-    router.push(path)
+    redirect(path)
   }
 
   return (
-    <div className="flex  bg-gray-50 dark:bg-gray-900">
-    
-      <div className="w-16 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col items-center py-4">
-        {/* Company Logo */}
-        <div className="mb-8">
-          <div className="w-10 h-10 rounded-md bg-emerald-600 flex items-center justify-center text-white font-bold">
-            P
+  
+      <div className="flex  bg-gray-50 dark:bg-gray-900">
+      
+        <div className="w-16 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col items-center py-4">
+          {/* Company Logo */}
+          <div className="mb-8">
+            <div className="w-10 h-10 rounded-md bg-emerald-600 flex items-center justify-center text-white font-bold">
+              P
+            </div>
           </div>
+
+          {/* Navigation Icons */}
+          <nav className="flex flex-col items-center space-y-3 flex-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "h-10 w-10 rounded-md",
+                activeTab === "home"
+                  ? "bg-emerald-50 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400"
+                  : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
+              )}
+              onClick={() => handleTabClick("home", "/dashboard")}
+            >
+              <Home size={20} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "h-10 w-10 rounded-md",
+                activeTab === "chat"
+                  ? "bg-emerald-50 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400"
+                  : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
+              )}
+              onClick={() => handleTabClick("chat", "/chat")}
+            >
+              <MessageSquare size={20} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "h-10 w-10 rounded-md",
+                activeTab === "analytics"
+                  ? "bg-emerald-50 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400"
+                  : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
+              )}
+              onClick={() => handleTabClick("analytics", "/analytics")}
+            >
+              <BarChart size={20} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "h-10 w-10 rounded-md",
+                activeTab === "users"
+                  ? "bg-emerald-50 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400"
+                  : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
+              )}
+              onClick={() => handleTabClick("users", "/users")}
+            >
+              <Users size={20} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "h-10 w-10 rounded-md",
+                activeTab === "phone"
+                  ? "bg-emerald-50 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400"
+                  : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
+              )}
+              onClick={() => handleTabClick("phone", "/phone")}
+            >
+              <Phone size={20} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "h-10 w-10 rounded-md",
+                activeTab === "star"
+                  ? "bg-emerald-50 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400"
+                  : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
+              )}
+              onClick={() => handleTabClick("star", "/star")}
+            >
+              <Star size={20} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "h-10 w-10 rounded-md",
+                activeTab === "archive"
+                  ? "bg-emerald-50 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400"
+                  : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
+              )}
+              onClick={() => handleTabClick("archive", "/archive")}
+            >
+              <Archive size={20} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "h-10 w-10 rounded-md",
+                activeTab === "alerts"
+                  ? "bg-emerald-50 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400"
+                  : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
+              )}
+              onClick={() => handleTabClick("alerts", "/alerts")}
+            >
+              <AlertCircle size={20} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "h-10 w-10 rounded-md",
+                activeTab === "settings"
+                  ? "bg-emerald-50 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400"
+                  : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
+              )}
+              onClick={() => handleTabClick("settings", "/settings")}
+            >
+              <Settings size={20} />
+            </Button>
+          </nav>
         </div>
 
-        {/* Navigation Icons */}
-        <nav className="flex flex-col items-center space-y-3 flex-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn(
-              "h-10 w-10 rounded-md",
-              activeTab === "home"
-                ? "bg-emerald-50 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400"
-                : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
-            )}
-            onClick={() => handleTabClick("home", "/dashboard")}
-          >
-            <Home size={20} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn(
-              "h-10 w-10 rounded-md",
-              activeTab === "chat"
-                ? "bg-emerald-50 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400"
-                : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
-            )}
-            onClick={() => handleTabClick("chat", "/chat")}
-          >
-            <MessageSquare size={20} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn(
-              "h-10 w-10 rounded-md",
-              activeTab === "analytics"
-                ? "bg-emerald-50 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400"
-                : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
-            )}
-            onClick={() => handleTabClick("analytics", "/analytics")}
-          >
-            <BarChart size={20} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn(
-              "h-10 w-10 rounded-md",
-              activeTab === "users"
-                ? "bg-emerald-50 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400"
-                : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
-            )}
-            onClick={() => handleTabClick("users", "/users")}
-          >
-            <Users size={20} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn(
-              "h-10 w-10 rounded-md",
-              activeTab === "phone"
-                ? "bg-emerald-50 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400"
-                : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
-            )}
-            onClick={() => handleTabClick("phone", "/phone")}
-          >
-            <Phone size={20} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn(
-              "h-10 w-10 rounded-md",
-              activeTab === "star"
-                ? "bg-emerald-50 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400"
-                : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
-            )}
-            onClick={() => handleTabClick("star", "/star")}
-          >
-            <Star size={20} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn(
-              "h-10 w-10 rounded-md",
-              activeTab === "archive"
-                ? "bg-emerald-50 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400"
-                : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
-            )}
-            onClick={() => handleTabClick("archive", "/archive")}
-          >
-            <Archive size={20} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn(
-              "h-10 w-10 rounded-md",
-              activeTab === "alerts"
-                ? "bg-emerald-50 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400"
-                : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
-            )}
-            onClick={() => handleTabClick("alerts", "/alerts")}
-          >
-            <AlertCircle size={20} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn(
-              "h-10 w-10 rounded-md",
-              activeTab === "settings"
-                ? "bg-emerald-50 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400"
-                : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700",
-            )}
-            onClick={() => handleTabClick("settings", "/settings")}
-          >
-            <Settings size={20} />
-          </Button>
-        </nav>
-      </div>
-
-      <div className="flex-1 flex flex-col">
-        <header className="h-12 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4">
-          <div className="flex items-center space-x-4">
-            <div className="font-medium text-gray-800 dark:text-white">
-              {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
-            </div>
-          </div>
-
-          {/* Right side - Actions */}
-          <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm">
-          <RefreshCw className="h-4 w-4 mr-1" />
-          Refresh
-          </Button>
-
-          <Button variant="ghost" size="sm">
-            <HelpCircle className="h-4 w-4 mr-1" />
-            Help
-          </Button>
-          <Button variant="ghost" size="sm" onClick={signOut}>
-            <LogOut className="h-4 w-4 mr-1" />
-            Logout
-          </Button>
-           <div className="flex items-center">
-              {mounted && (
-                <button
-                  className="border p-2.5 rounded-lg text-foreground/60 hover:dark:bg-[#191919] hover:bg-gray-100 md:mx-4 outline-none"
-                  onClick={toggleTheme}
-                  aria-label="theme"
-                >
-                  {theme === 'dark' ? (
-                    <Moon className="w-4 h-4" />
-                  ) : (
-                    <Sun className="w-4 h-4" />
-                  )}
-                </button>
-              )}
+        <div className="flex-1 flex flex-col">
+          <header className="h-12 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4">
+            <div className="flex items-center space-x-4">
+              <div className="font-medium text-gray-800 dark:text-white">
+                {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+              </div>
             </div>
 
-          
-          </div>
-        </header>
+            {/* Right side - Actions */}
+            <div className="flex items-center space-x-2">
+            <Button variant="ghost" size="sm">
+            <RefreshCw className="h-4 w-4 mr-1" />
+            Refresh
+            </Button>
 
-        <main className="overflow-auto">{children}</main>
+            <Button variant="ghost" size="sm">
+              <HelpCircle className="h-4 w-4 mr-1" />
+              Help
+            </Button>
+            <Button variant="ghost" size="sm" onClick={signOut}>
+              <LogOut className="h-4 w-4 mr-1" />
+              Logout
+            </Button>
+            <div className="flex items-center">
+                {mounted && (
+                  <button
+                    className="border p-2.5 rounded-lg text-foreground/60 hover:dark:bg-[#191919] hover:bg-gray-100 md:mx-4 outline-none"
+                    onClick={toggleTheme}
+                    aria-label="theme"
+                  >
+                    {theme === 'dark' ? (
+                      <Moon className="w-4 h-4" />
+                    ) : (
+                      <Sun className="w-4 h-4" />
+                    )}
+                  </button>
+                )}
+              </div>
+
+            
+            </div>
+          </header>
+
+          <main className="overflow-auto">{children}</main>
+        </div>
       </div>
-    </div>
+
+    
   )
 }

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Avatar } from "@/components/ui/avatar"
 import { Plus, Search, X } from "lucide-react"
 import { SearchUserProfile, createGroupChat, createOneOnOneChat } from "@/actions/chat"
+import Image from "next/image"
 
 interface UserProfile {
   id: string;
@@ -145,7 +146,7 @@ export default function NewChatDialog({ onChatCreated }: NewChatDialogProps) {
                 {selectedUsers.map(user => (
                   <div key={user.id} className="flex items-center bg-muted rounded-full pl-1 pr-2 py-1">
                     <Avatar className="h-6 w-6 mr-1">
-                      <img src={user.avatar_url || "/placeholder.svg?height=24&width=24"} alt={user.name} />
+                      <Image src={user.avatar_url || "/placeholder.svg?height=24&width=24"} alt={user.name} width={24} height={24} />
                     </Avatar>
                     <span className="text-xs">{user.name}</span>
                     <Button 
@@ -174,7 +175,7 @@ export default function NewChatDialog({ onChatCreated }: NewChatDialogProps) {
                     onClick={() => handleSelectUser(user)}
                   >
                     <Avatar className="h-8 w-8 mr-2">
-                      <img src={user.avatar_url || "/placeholder.svg?height=32&width=32"} alt={user.name} />
+                      <Image src={user.avatar_url || "/placeholder.svg?height=32&width=32"} alt={user.name} width={32} height={32} />
                     </Avatar>
                     <div>
                       <p className="text-sm font-medium">{user.name}</p>

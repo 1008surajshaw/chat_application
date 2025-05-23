@@ -15,6 +15,7 @@ import { useAuth } from "@/providers/auth-provider"
 import { useSocket } from '@/hooks/use-socket';
 import { createClient } from '@supabase/supabase-js';
 import { debounce } from 'lodash';
+import Image from "next/image"
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL! as string;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY! as string;
@@ -340,7 +341,7 @@ export default function ChatWindow({
 
         <div className="flex items-center flex-1 cursor-pointer" onClick={onProfileClick}>
           <Avatar className="h-10 w-10 mr-3">
-            <img src={selectedChat.avatar || "/placeholder.svg?height=40&width=40"} alt={selectedChat.title} />
+            <Image src={selectedChat.avatar || "/placeholder.svg?height=40&width=40"} alt={selectedChat.title} width={40} height={40} />
           </Avatar>
 
           <div>
@@ -376,9 +377,9 @@ export default function ChatWindow({
       <div
         className="flex-1 overflow-y-auto p-4 space-y-4"
         style={{
-          backgroundImage: "url('/placeholder.svg?height=500&width=500')",
-          backgroundSize: "30%",
-          backgroundRepeat: "repeat",
+          //add a gradient backgroundaccording to color theme
+          backgroundImage: "radial-gradient(circle,rgba(122, 230, 83, 1) 0%, rgba(148, 187, 233, 1) 100%)",
+         
         }}
       >
         {Object.entries(messagesByDate).map(([date, dateMessages]) => (
