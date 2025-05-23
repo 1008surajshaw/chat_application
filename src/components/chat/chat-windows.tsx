@@ -15,6 +15,9 @@ import { useAuth } from "@/providers/auth-provider"
 import { useSocket } from '@/hooks/use-socket';
 import { createClient } from '@supabase/supabase-js';
 import { debounce } from 'lodash';
+import Image from "next/image"
+import { ChatMessagesSkeleton } from "../ui/skeletons/chat-messages-skeleton"
+import { AnimatedTooltip } from "../ui/animated-tooltip"
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL! as string;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY! as string;
@@ -38,14 +41,41 @@ export default function ChatWindow({
   const [newMessage, setNewMessage] = useState("")
   const [chatMessages, setChatMessages] = useState<any[]>([])
   const [isMessagesLoading, setIsMessagesLoading] = useState(false)
+  const [chatMembers, setChatMembers] = useState<any[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const isMobile = useMobile()
   const { user } = useAuth()
+
+
+
+  useEffect(() => {
+    const fetchChatMembers = async () => {
+      if (!chatId) return;
+      
+      try {
+        const members = await getAllUserForSpecificChat(chatId);
+        if (Array.isArray(members)) {
+          // Format members for AnimatedTooltip
+          const formattedMembers = members.map((member, index) => ({
+            id: index,
+            name: member.name || 'Unknown User',
+            image: member.avatar_url || '/placeholder.svg?height=40&width=40'
+          }));
+          setChatMembers(formattedMembers);
+        }
+      } catch (error) {
+        console.error("Error fetching chat members:", error);
+      }
+    };
+    
+    fetchChatMembers();
+  }, [chatId]);
+
+
   
   // Use the enhanced socket hook
   const { socket, isConnected, sendSocketMessage, handleTyping, typingUsers, onlineUsers } = useSocket(chatId);
   
-  // Find the selected chat from userChats
   const selectedChat = useMemo(() => {
     return userChats.find(chat => chat.id === chatId) || null
   }, [chatId, userChats]);
@@ -54,9 +84,7 @@ export default function ChatWindow({
   const otherUserId = useMemo(() => {
     if (!selectedChat || selectedChat.isGroup || !user?.id) return null;
     
-    // For a one-on-one chat, find the other user's ID
-    // This assumes you have access to chat members data
-    // You might need to adjust this based on your data structure
+ 
     //@ts-ignore
     const { data: members } = supabase
       .from("chat_members")
@@ -310,11 +338,7 @@ export default function ChatWindow({
   }, [chatMessages])
 
   if (isChatLoading || isMessagesLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-      </div>
-    )
+    return <ChatMessagesSkeleton/>
   }
 
   if (!selectedChat) {
@@ -340,7 +364,7 @@ export default function ChatWindow({
 
         <div className="flex items-center flex-1 cursor-pointer" onClick={onProfileClick}>
           <Avatar className="h-10 w-10 mr-3">
-            <img src={selectedChat.avatar || "/placeholder.svg?height=40&width=40"} alt={selectedChat.title} />
+            <Image src={selectedChat.avatar || "/placeholder.svg?height=40&width=40"} alt={selectedChat.title} width={40} height={40} />
           </Avatar>
 
           <div>
@@ -356,37 +380,36 @@ export default function ChatWindow({
           </div>
         </div>
 
+        <div className=" flex items-center gap-4">
+
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" className="rounded-full">
-            <VideoIcon className="h-5 w-5" />
-          </Button>
-          <Button variant="ghost" size="icon" className="rounded-full">
-            <Phone className="h-5 w-5" />
-          </Button>
+          <AnimatedTooltip items={chatMembers} />
+        </div>
           <Button variant="ghost" size="icon" className="rounded-full">
             <Search className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon" className="rounded-full">
-            <MoreVertical className="h-5 w-5" />
-          </Button>
         </div>
+          
+         
+        
       </div>
 
       {/* Messages */}
       <div
         className="flex-1 overflow-y-auto p-4 space-y-4"
         style={{
-          backgroundImage: "url('/placeholder.svg?height=500&width=500')",
-          backgroundSize: "30%",
-          backgroundRepeat: "repeat",
+          //add a gradient backgroundaccording to color theme
+            backgroundImage: "radial-gradient(circle, hsla(270, 6%, 74%, 1) 0%, hsla(0, 0%, 100%, 1) 100%)",
+            background: "-moz-radial-gradient(circle, hsla(270, 6%, 74%, 1) 0%, hsla(0, 0%, 100%, 1) 100%)",
+            filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#BDB9C1', endColorstr='#FFFFFF', GradientType=1)",
         }}
       >
         {Object.entries(messagesByDate).map(([date, dateMessages]) => (
           <div key={date} className="space-y-2">
             <div className="flex justify-center">
-              <Badge variant="outline" className="bg-background/80 text-xs font-normal">
+                <div className="text-gray-700 bg-gray-400 bg-opacity-20 px-0.5 py-0.5 rounded-md font-light dark:text-white dark:bg-gray-800 text-xs ">
                 {date}
-              </Badge>
+                </div>
             </div>
 
             {dateMessages.map((message) => {

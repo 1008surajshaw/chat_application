@@ -40,7 +40,7 @@ export async function fetchUserChats(): Promise<ChatPreview[]> {
         }
       } else {
         title = chat.chat_name || "Group Chat";
-        avatar = `https://api.dicebear.com/5.x/initials/svg?seed=${encodeURIComponent(title)}`;
+        avatar = `https://api.dicebear.com/5.x/initials/svg?seed=${title}`;
       }
 
       const messages = await getChatMessages(chat.id);

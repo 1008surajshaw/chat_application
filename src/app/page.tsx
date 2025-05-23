@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Auth from "@/components/Auth";
 import { useAuth } from "@/providers/auth-provider";
-import { FullPageLoader } from "@/components/ui/loading";
+import { FullScreenSkeleton } from "@/components/ui/skeletons/full-screen-skeleton";
 
 export default function Home() {
   const router = useRouter();
@@ -17,7 +17,7 @@ export default function Home() {
   }, [user, router]);
 
   if (isLoading) {
-    return <FullPageLoader />;
+    return <FullScreenSkeleton />;
   }
   
   return (

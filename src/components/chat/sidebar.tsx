@@ -10,6 +10,7 @@ import ChatList from "./sidebar/chat-list"
 import NewChatPanel from "./sidebar/new-chat-panel"
 import CreateGroupPanel from "./sidebar/create-group-panel"
 import { Chat } from "@/interface/interface"
+import { ChatListSkeleton } from "../ui/skeletons/chat-list-skeleton"
 
 interface SidebarProps {
   onChatSelect: (chatId: string) => void
@@ -107,9 +108,7 @@ export default function Sidebar({ onChatSelect, selectedChat, userChats, isChatL
   }
   
   if(isChatLoading){
-    return <div className="flex items-center justify-center h-full">
-      <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-    </div>
+    return <ChatListSkeleton/>
   }
 
   return (

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar } from "@/components/ui/avatar"
 import { SearchUserProfile, createOneOnOneChat } from "@/actions/chat"
+import Image from "next/image"
 
 interface UserProfile {
   id: string;
@@ -129,7 +130,7 @@ export default function NewChatPanel({
               <div key={user.id} className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-md">
                 <div className="flex items-center">
                   <Avatar className="h-10 w-10 mr-3">
-                    <img src={user.avatar_url || "/placeholder.svg?height=40&width=40"} alt={user.name} />
+                    <Image src={user.avatar_url || "/placeholder.svg?height=40&width=40"} alt={user.name} width={40} height={40} />
                   </Avatar>
                   <div>
                     <h3 className="text-sm font-medium">{user.name}</h3>
