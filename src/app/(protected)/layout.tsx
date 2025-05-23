@@ -21,10 +21,10 @@ import {
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { usePathname } from "next/navigation"
-import { FullPageLoader } from "@/components/ui/loading"
 import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react"
 import { FullScreenSkeleton } from "@/components/ui/skeletons/full-screen-skeleton";
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription } from "@/components/ui/alert-dialog";
 
 interface DashboardLayoutProps {
   children: ReactNode
@@ -36,6 +36,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { theme, setTheme } = useTheme();
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
 
   useEffect(() => {
     setMounted(true);
@@ -208,9 +210,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="flex-1 flex flex-col">
           <header className="h-12 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4">
             <div className="flex items-center space-x-4">
-              <div className="font-medium text-gray-800 dark:text-white">
-                {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
-              </div>
+                <div className="flex items-center space-x-2 font-medium text-gray-800 dark:text-white">
+                <MessageSquare className="h-5 w-5" />
+                <span>Chat</span>
+                </div>
             </div>
 
             {/* Right side - Actions */}
@@ -224,10 +227,34 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <HelpCircle className="h-4 w-4 mr-1" />
               Help
             </Button>
-            <Button variant="ghost" size="sm" onClick={signOut}>
+           
+
+            <Button variant="ghost" size="sm" onClick={() => setIsDialogOpen(true)}>
               <LogOut className="h-4 w-4 mr-1" />
               Logout
             </Button>
+
+            <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <AlertDialogTrigger asChild>
+                <div />
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action will log you out of your account.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button variant="destructive" onClick={signOut}>
+                    Logout
+                  </Button>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <div className="flex items-center">
                 {mounted && (
                   <button

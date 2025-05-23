@@ -1,7 +1,6 @@
 import { Server as NetServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
-import { NextApiRequest } from 'next';
-import { NextResponse } from 'next/server';
+
 import { createServer } from 'http';
 
 // Global variable to store the Socket.IO server instance

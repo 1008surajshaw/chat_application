@@ -10,6 +10,7 @@ import { FullPageLoader } from "../ui/loading"
 import Sidebar from "./sidebar"
 import { MessageSquare } from "lucide-react"
 import { fetchUserChats } from "@/services/chat-service"
+import { FullScreenSkeleton } from "../ui/skeletons/full-screen-skeleton"
 
 export default function ChatInterface() {
 
@@ -33,7 +34,7 @@ export default function ChatInterface() {
   }
 
   if (isLoading) {
-    return <FullPageLoader />
+    return <FullScreenSkeleton/>
   }
 
    useEffect(() => {
