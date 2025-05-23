@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar } from "@/components/ui/avatar"
 import { Plus, Search, X } from "lucide-react"
-import { SearchUserProfile, createChat } from "@/actions/chat"
+import { SearchUserProfile, createGroupChat, createOneOnOneChat } from "@/actions/chat"
 
 interface UserProfile {
   id: string;
@@ -64,7 +64,15 @@ export default function NewChatDialog({ onChatCreated }: NewChatDialogProps) {
         (selectedUsers.length === 1 ? selectedUsers[0].name : `Group (${selectedUsers.length})`)
       
       const userIds = selectedUsers.map(user => user.id)
-      const chat = await createChat(name, userIds)
+      
+      let chat;
+      if (selectedUsers.length === 1) {
+        // Create a one-on-one chat
+        chat = await createOneOnOneChat(selectedUsers[0].id)
+      } else {
+        // Create a group chat
+        chat = await createGroupChat(name, userIds)
+      }
       
       if (chat) {
         onChatCreated(chat.id)

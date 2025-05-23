@@ -24,7 +24,7 @@ export const initSocketServer = () => {
       }
     });
     
-    const PORT = parseInt(process.env.SOCKET_PORT || '3001', 10);
+    const PORT = parseInt(process.env.PORT || '3001', 10);
     httpServer.listen(PORT, () => {
       console.log(`Socket.IO server running on port ${PORT}`);
     });
