@@ -5,6 +5,6 @@ export const dynamic = 'force-dynamic'
 // Disable static generation to ensure we get fresh data
 export const revalidate = 0
 
-export default function ChatPage() {
+export default function ChatDetailPage() {
   return <ChatInterface />
 }

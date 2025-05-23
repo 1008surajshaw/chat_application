@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Search, Filter, X, Users } from "lucide-react"
+import { Search, Filter, X, Users, Tag } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
@@ -12,6 +12,7 @@ interface FilterBarProps {
   customFilterName: string
   setCustomFilterName: (name: string) => void
   onCreateGroup: () => void
+  onManageLabels: () => void
 }
 
 export default function FilterBar({
@@ -20,7 +21,8 @@ export default function FilterBar({
   onSaveFilter,
   customFilterName,
   setCustomFilterName,
-  onCreateGroup
+  onCreateGroup,
+  onManageLabels
 }: FilterBarProps) {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -65,6 +67,7 @@ export default function FilterBar({
         <Button
           variant="ghost"
           className="text-xs font-normal justify-start h-auto text-green-500 flex items-center whitespace-nowrap"
+          onClick={onManageLabels}
         >
           <Filter className="h-4 w-4 mr-1" />
           Custom filter

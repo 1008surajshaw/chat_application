@@ -48,6 +48,16 @@ export async function fetchUserChats(): Promise<ChatPreview[]> {
         //@ts-ignore
         new Date(b.sent_at).getTime() - new Date(a.sent_at).getTime()
       )[0];
+      
+      // Fetch labels for this chat
+      const { data: labelData, error: labelError } = await supabase
+        .from('chat_labels')
+        .select('labels(label_name)')
+        .eq('chat_id', chat.id);
+      
+      const labels = labelError || !labelData ? [] : 
+      //@ts-ignore
+        labelData.map(item => item.labels.label_name);
 
       previews.push({
         id: chat.id,
@@ -57,7 +67,7 @@ export async function fetchUserChats(): Promise<ChatPreview[]> {
         lastMessageTime: lastMessage ? formatMessageTime(lastMessage.sent_at) : "Just now",
         unread: false,
         isGroup: chat.is_group,
-        labels: []
+        labels
       });
     }
 
@@ -106,4 +116,24 @@ export async function searchContacts(query: string): Promise<any[]> {
   // Implement contact search using the backend API
   // This would call your SearchUserProfile function
   return [];
+}
+
+// Add this function to fetch labels for a chat
+export async function getChatLabels(chatId: string): Promise<string[]> {
+  try {
+    const { data, error } = await supabase
+      .from('chat_labels')
+      .select('labels(label_name, color)')
+      .eq('chat_id', chatId);
+    
+    if (error) {
+      console.error('Error fetching chat labels:', error);
+      return [];
+    }
+    //@ts-ignore
+    return data?.map(item => item.labels.label_name) || [];
+  } catch (error) {
+    console.error('Failed to fetch chat labels:', error);
+    return [];
+  }
 }

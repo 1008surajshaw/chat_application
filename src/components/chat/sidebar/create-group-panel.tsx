@@ -122,34 +122,28 @@ export default function CreateGroupPanel({
   }
 
   // Create the group
-  const createGroup = async () => {
-    if (!groupName.trim()) {
-      toast.error("Please enter a group name")
-      return
+  const handleCreateGroup = async () => {
+    if (selectedUsers.length === 0 || !groupName.trim()) {
+      toast.error("Please select users and provide a group name");
+      return;
     }
 
-    if (selectedUsers.length < 2) {
-      toast.error("Please select at least 2 members to create a group")
-      return
-    }
-
-    setIsCreating(true)
+    setIsCreating(true);
     try {
-      const userIds = selectedUsers.map(user => user.id)
-      const chat = await createGroupChat(groupName, userIds)
+      const userIds = selectedUsers.map(user => user.id);
+      const chat = await createGroupChat(groupName, userIds);
       
       if (chat && onGroupCreated) {
-        onGroupCreated(chat.id)
-        toast.success("Group created successfully")
-        resetAndClose()
+        onGroupCreated(chat.id);
+        resetAndClose();
       }
     } catch (error) {
-      console.error("Error creating group:", error)
-      toast.error("Failed to create group")
+      console.error("Error creating group chat:", error);
+      toast.error("Failed to create group chat");
     } finally {
-      setIsCreating(false)
+      setIsCreating(false);
     }
-  }
+  };
 
   // Reset and close
   const resetAndClose = () => {
@@ -302,7 +296,7 @@ export default function CreateGroupPanel({
 
             <Button 
               className="w-full mt-4" 
-              onClick={createGroup}
+              onClick={handleCreateGroup}
               disabled={isCreating || !groupName.trim()}
             >
               {isCreating ? (

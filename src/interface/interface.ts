@@ -1,3 +1,9 @@
+export interface Label {
+  id: string;
+  label_name: string;
+  color: string;
+}
+
 export interface Chat {
   id: string;
   title: string;

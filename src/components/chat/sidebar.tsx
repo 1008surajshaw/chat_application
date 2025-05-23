@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useState, useEffect, useCallback, useRef } from "react"
+import { useRouter, useSearchParams, useParams } from "next/navigation"
 import { MessageSquarePlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -9,15 +9,10 @@ import FilterBar from "./sidebar/filter-bar"
 import ChatList from "./sidebar/chat-list"
 import NewChatPanel from "./sidebar/new-chat-panel"
 import CreateGroupPanel from "./sidebar/create-group-panel"
-import { Chat } from "@/interface/interface"
+import LabelManagementPanel from "./sidebar/label-management-panel"
 import { ChatListSkeleton } from "../ui/skeletons/chat-list-skeleton"
-
-interface SidebarProps {
-  onChatSelect: (chatId: string) => void
-  selectedChat: string | null
-  userChats: Chat[]
-  isChatLoading: boolean
-}
+import { useChatStore } from "@/store/chat-store"
+import { useAuth } from "@/providers/auth-provider"
 
 interface CustomFilter {
   id: string
@@ -25,9 +20,26 @@ interface CustomFilter {
   query: string
 }
 
-export default function Sidebar({ onChatSelect, selectedChat, userChats, isChatLoading }: SidebarProps) {
+interface SidebarProps {
+  onChatSelect?: (chatId: string) => void
+}
+
+export default function Sidebar({ onChatSelect }: SidebarProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const params = useParams()
+  const { user } = useAuth()
+  const initialRenderRef = useRef(true)
+  
+  // Use the chat store
+  const { 
+    chats, 
+    selectedChatId, 
+    isLoading, 
+    fetchChats, 
+    selectChat,
+    filterChatsByLabel
+  } = useChatStore()
 
   const [searchQuery, setSearchQuery] = useState("")
   const [newChatSearchQuery, setNewChatSearchQuery] = useState("")
@@ -37,7 +49,20 @@ export default function Sidebar({ onChatSelect, selectedChat, userChats, isChatL
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null)
   const [isNewChatOpen, setIsNewChatOpen] = useState(false)
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false)
+  const [isLabelManagementOpen, setIsLabelManagementOpen] = useState(false)
+  const [initialLoadDone, setInitialLoadDone] = useState(false)
 
+  // Fetch chats only once when component mounts
+  useEffect(() => {
+    if (!initialLoadDone && user) {
+      console.log("Sidebar: Fetching chats on initial load")
+      fetchChats().then(() => {
+        setInitialLoadDone(true)
+      })
+    }
+  }, [user, fetchChats, initialLoadDone])
+
+  // Handle URL search params only once
   useEffect(() => {
     const query = searchParams.get("q") || ""
     setSearchQuery(query)
@@ -48,23 +73,28 @@ export default function Sidebar({ onChatSelect, selectedChat, userChats, isChatL
     }
   }, [searchParams])
 
+  // Update URL only when search query changes
   useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString())
-
-    if (searchQuery) {
-      params.set("q", searchQuery)
-    } else {
-      params.delete("q")
+    const currentQuery = searchParams.get("q") || ""
+    
+    // Only update if the query has actually changed
+    if (searchQuery !== currentQuery) {
+      const params = new URLSearchParams(searchParams.toString())
+  
+      if (searchQuery) {
+        params.set("q", searchQuery)
+      } else {
+        params.delete("q")
+      }
+  
+      router.replace(`/chat?${params.toString()}`, { scroll: false })
     }
-
-    router.replace(`/chat?${params.toString()}`)
   }, [searchQuery, router, searchParams])
 
-  const filteredChats = userChats.filter(
-    (chat) =>
-      chat.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      (activeFilter === "all" || chat.labels.includes(activeFilter)),
-  )
+  // Filter chats based on search query and active label filter
+  const filteredChats = chats
+    .filter(chat => chat.title.toLowerCase().includes(searchQuery.toLowerCase()))
+    .filter(chat => activeFilter === "all" || chat.labels.includes(activeFilter))
 
   const handleSaveFilter = () => {
     if (!customFilterName.trim()) return
@@ -82,11 +112,32 @@ export default function Sidebar({ onChatSelect, selectedChat, userChats, isChatL
     setSelectedFilter(newFilter.id)
   }
 
+  const handleChatSelect = useCallback((chatId: string) => {
+    console.log("Sidebar: Selecting chat", chatId)
+    
+    // Use the provided onChatSelect callback if available
+    if (onChatSelect) {
+      onChatSelect(chatId)
+    } else {
+      // Otherwise, handle it here
+      selectChat(chatId)
+      
+      // Update URL without full page reload
+      if (initialRenderRef.current) {
+        initialRenderRef.current = false
+      } else {
+        router.push(`/chat/${chatId}`, { scroll: false })
+      }
+    }
+  }, [selectChat, onChatSelect, router])
+
   const openNewChat = () => {
     setIsNewChatOpen(true)
-    // Close create group panel if open
     if (isCreateGroupOpen) {
       setIsCreateGroupOpen(false)
+    }
+    if (isLabelManagementOpen) {
+      setIsLabelManagementOpen(false)
     }
   }
 
@@ -97,9 +148,12 @@ export default function Sidebar({ onChatSelect, selectedChat, userChats, isChatL
 
   const openCreateGroup = () => {
     setIsCreateGroupOpen(true)
-    // Close new chat panel if open
+    // Close other panels if open
     if (isNewChatOpen) {
       setIsNewChatOpen(false)
+    }
+    if (isLabelManagementOpen) {
+      setIsLabelManagementOpen(false)
     }
   }
 
@@ -107,15 +161,28 @@ export default function Sidebar({ onChatSelect, selectedChat, userChats, isChatL
     setIsCreateGroupOpen(false)
   }
   
-  if(isChatLoading){
+  const openLabelManagement = () => {
+    setIsLabelManagementOpen(true)
+    // Close other panels if open
+    if (isNewChatOpen) {
+      setIsNewChatOpen(false)
+    }
+    if (isCreateGroupOpen) {
+      setIsCreateGroupOpen(false)
+    }
+  }
+  
+  const closeLabelManagement = () => {
+    setIsLabelManagementOpen(false)
+  }
+  
+  if(isLoading && !initialLoadDone){
     return <ChatListSkeleton/>
   }
 
   return (
     <div className="flex flex-col h-full w-full relative">
-      {/* Main sidebar content */}
       <div className="flex flex-col h-full w-full relative">
-        {/* Filter Bar */}
         <FilterBar
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
@@ -123,13 +190,14 @@ export default function Sidebar({ onChatSelect, selectedChat, userChats, isChatL
           customFilterName={customFilterName}
           setCustomFilterName={setCustomFilterName}
           onCreateGroup={openCreateGroup}
+          onManageLabels={openLabelManagement}
         />
 
         {/* Chat List */}
         <ChatList
           chats={filteredChats}
-          selectedChat={selectedChat}
-          onChatSelect={onChatSelect}
+          selectedChat={selectedChatId}
+          onChatSelect={handleChatSelect}
           onNewChat={openNewChat}
         />
 
@@ -140,8 +208,9 @@ export default function Sidebar({ onChatSelect, selectedChat, userChats, isChatL
           searchQuery={newChatSearchQuery}
           setSearchQuery={setNewChatSearchQuery}
           onChatCreated={(chatId) => {
-            // When a new chat is created, select it
-            onChatSelect(chatId);
+            handleChatSelect(chatId);
+            // Refresh chats after creating a new one
+            fetchChats();
           }}
         />
 
@@ -150,15 +219,22 @@ export default function Sidebar({ onChatSelect, selectedChat, userChats, isChatL
           isOpen={isCreateGroupOpen}
           onClose={closeCreateGroup}
           onGroupCreated={(chatId) => {
-            // When a new group is created, select it
-            onChatSelect(chatId);
+            handleChatSelect(chatId);
+            // Refresh chats after creating a new group
+            fetchChats();
           }}
         />
+        
+        {/* Label Management Panel */}
+        <LabelManagementPanel
+          isOpen={isLabelManagementOpen}
+          onClose={closeLabelManagement}
+        />
 
-        {/* New Chat Button - fixed at bottom right */}
-        <Button onClick={openNewChat} className="absolute bottom-4 right-4 h-12 w-12 rounded-full shadow-lg z-20" size="icon">
-          <MessageSquarePlus className="h-6 w-6" />
+        <Button onClick={openNewChat} className="absolute bottom-4 right-4 h-12 w-12 rounded-full shadow-lg z-20 bg-green-600 hover:bg-green-700" size="icon">
+          <MessageSquarePlus className="h-10 w-10" />
         </Button>
+
       </div>
     </div>
   )
