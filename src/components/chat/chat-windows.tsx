@@ -398,7 +398,6 @@ export default function ChatWindow({
       <div
         className="flex-1 overflow-y-auto p-4 space-y-4"
         style={{
-          //add a gradient backgroundaccording to color theme
             backgroundImage: "radial-gradient(circle, hsla(270, 6%, 74%, 1) 0%, hsla(0, 0%, 100%, 1) 100%)",
             background: "-moz-radial-gradient(circle, hsla(270, 6%, 74%, 1) 0%, hsla(0, 0%, 100%, 1) 100%)",
             filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#BDB9C1', endColorstr='#FFFFFF', GradientType=1)",
@@ -446,6 +445,7 @@ export default function ChatWindow({
       {/* Message Input */}
       <div className="p-2 border-t bg-sidebar">
         <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+
           <Button type="button" variant="ghost" size="icon" className="rounded-full">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -465,6 +465,7 @@ export default function ChatWindow({
               <line x1="15" x2="15.01" y1="9" y2="9" />
             </svg>
           </Button>
+          
           <Button type="button" variant="ghost" size="icon" className="rounded-full">
             <svg
               xmlns="http://www.w3.org/2000/svg"

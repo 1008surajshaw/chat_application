@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import Image from "next/image"
+import { useChatStore } from "@/store/chat-store"
 
 interface Chat {
   id: string

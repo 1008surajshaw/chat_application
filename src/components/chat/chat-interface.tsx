@@ -1,80 +1,102 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback, useRef } from "react"
+import { useParams, useRouter } from "next/navigation"
 import ChatWindow from "@/components/chat/chat-windows"
 import ProfilePanel from "@/components/chat/profile-panel"
-
 import { useMobile } from "@/hooks/use-mobile"
 import { useAuth } from "@/providers/auth-provider"
-import { FullPageLoader } from "../ui/loading"
 import Sidebar from "./sidebar"
 import { MessageSquare } from "lucide-react"
-import { fetchUserChats } from "@/services/chat-service"
 import { FullScreenSkeleton } from "../ui/skeletons/full-screen-skeleton"
+import { useChatStore } from "@/store/chat-store"
 
 export default function ChatInterface() {
-
-  const [selectedChat, setSelectedChat] = useState<string | null>(null)
-  const [showProfilePanel, setShowProfilePanel] = useState(false)
-  const [userChats, setUserChats] = useState<any[]>([])
-  const [isChatLoading, setisChatLoading] = useState(true)
-  const { isLoading } = useAuth()
+  const params = useParams()
+  const router = useRouter()
+  const { isLoading: authLoading, user } = useAuth()
   const isMobile = useMobile()
+  const initialRenderRef = useRef(true)
+  
+  // Use the chat store
+  const { 
+    chats, 
+    selectedChatId, 
+    isLoading: chatsLoading, 
+    fetchChats, 
+    selectChat 
+  } = useChatStore()
 
-  const handleChatSelect = (chatId: string) => {
-    console.log("chatId", chatId);
-    setSelectedChat(chatId)
+  const [showProfilePanel, setShowProfilePanel] = useState(false)
+  const [initialLoadDone, setInitialLoadDone] = useState(false)
+
+  // Fetch chats only once when component mounts
+  useEffect(() => {
+    if (!initialLoadDone && user) {
+      console.log("Fetching chats on initial load")
+      fetchChats().then(() => {
+        setInitialLoadDone(true)
+      })
+    }
+  }, [fetchChats, initialLoadDone, user])
+
+  // Get chatId from URL params - only run when params change or after initial load
+  useEffect(() => {
+    if (initialLoadDone || !chatsLoading) {
+      const chatIdFromParams = params?.chatId as string
+      if (chatIdFromParams && chatIdFromParams !== selectedChatId) {
+        console.log("Setting selected chat from params:", chatIdFromParams)
+        selectChat(chatIdFromParams)
+      }
+    }
+  }, [params, selectChat, selectedChatId, initialLoadDone, chatsLoading])
+
+  // Handle chat selection without full page reload
+  const handleChatSelect = useCallback((chatId: string) => {
+    console.log("Selecting chat:", chatId)
+    
+    // Update the store state
+    selectChat(chatId)
+    
+    // Update the URL without triggering a full page reload
+    if (initialRenderRef.current) {
+      initialRenderRef.current = false
+    } else {
+      // Use shallow routing to update URL without reloading the page
+      router.push(`/chat/${chatId}`, { scroll: false })
+    }
+    
     if (isMobile) {
       setShowProfilePanel(false)
     }
-  }
+  }, [selectChat, router, isMobile])
 
   const toggleProfilePanel = () => {
     setShowProfilePanel(!showProfilePanel)
   }
 
-  if (isLoading) {
+  if (authLoading || (chatsLoading && !initialLoadDone)) {
     return <FullScreenSkeleton/>
   }
 
-   useEffect(() => {
-      const loadUserChats = async () => {
-        setisChatLoading(true)
-        try {
-          const chats = await fetchUserChats()
-          setUserChats(chats)
-        } catch (error) {
-          console.error("Failed to load user chats:", error)
-        } finally {
-          setisChatLoading(false)
-        }
-      }
-  
-      loadUserChats()
-  }, [])
-
   return (
     <div className="flex h-[calc(100vh-64px)] w-full bg-background overflow-hidden">
-      <div className={`${isMobile && selectedChat ? "hidden" : "w-[400px]"} flex-shrink-0 border-r h-full flex flex-col`}>
-        <Sidebar 
-          onChatSelect={handleChatSelect} 
-          selectedChat={selectedChat} 
-          userChats={userChats}
-          isChatLoading={isChatLoading}
-        />
+      <div className={`${isMobile && selectedChatId ? "hidden" : "w-[400px]"} flex-shrink-0 border-r h-full flex flex-col`}>
+        <Sidebar onChatSelect={handleChatSelect} />
       </div>
      
       {/* Chat Window - fixed height with scrollable messages */}
-      <div className={`${isMobile && !selectedChat ? "hidden" : "flex"} flex-1 flex-col h-full overflow-hidden`}>
-        {selectedChat ? (
+      <div className={`${isMobile && !selectedChatId ? "hidden" : "flex"} flex-1 flex-col h-full overflow-hidden`}>
+        {selectedChatId ? (
           <ChatWindow
-            chatId={selectedChat}
-            onBackClick={() => setSelectedChat(null)}
+            chatId={selectedChatId}
+            onBackClick={() => {
+              selectChat(null)
+              router.push('/chat', { scroll: false })
+            }}
             onProfileClick={toggleProfilePanel}
-            isChatLoading={isChatLoading}
-            userChats={userChats}
-            
-            
+            isChatLoading={chatsLoading}
+            userChats={chats}
           />
         ) : (
           <div className="flex flex-col items-center justify-center h-full bg-muted/20">
@@ -94,7 +116,7 @@ export default function ChatInterface() {
             </div>
           </div>
         )}
-        </div>
+      </div>
 
       {/* Profile Panel - fixed height */}
       {showProfilePanel && !isMobile && (
