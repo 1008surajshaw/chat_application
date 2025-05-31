@@ -121,40 +121,48 @@
   }
 }
 
-/* Custom scrollbar styles */
-::-webkit-scrollbar {
+/* Hide scrollbars for all elements by default */
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* Class to explicitly show scrollbars if needed */
+.show-scrollbar {
+  -ms-overflow-style: auto;
+  scrollbar-width: auto;
+}
+
+.show-scrollbar::-webkit-scrollbar {
+  display: block;
   width: 6px;
   height: 6px;
 }
 
-::-webkit-scrollbar-track {
+.show-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 
-::-webkit-scrollbar-thumb {
+.show-scrollbar::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 3px;
 }
 
-.dark ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-::-webkit-scrollbar-thumb:hover {
+.show-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.3);
 }
 
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-/* Hide scrollbar for Chrome, Safari and Opera */
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
-/* Hide scrollbar for IE, Edge and Firefox */
+/* Keep the existing hide-scrollbar class for backward compatibility */
 .hide-scrollbar {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }
