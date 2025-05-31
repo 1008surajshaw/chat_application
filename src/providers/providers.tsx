@@ -8,12 +8,7 @@ import SocketProvider from './socket-provider';
 const Provider: FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <AuthProvider>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
+      
         <SocketProvider>
           <Toaster 
             position="top-center" 
@@ -23,7 +18,6 @@ const Provider: FC<{ children: ReactNode }> = ({ children }) => {
           />
           {children}
         </SocketProvider>
-      </ThemeProvider>
     </AuthProvider>
   );
 };

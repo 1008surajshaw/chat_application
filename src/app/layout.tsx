@@ -1,44 +1,43 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import Provider from "@/providers/providers";
-import { useEffect } from 'react';
+import { cn } from '@/lib/utils';
+import Providers from '@/providers/providers';
+import type { Metadata } from 'next';
+import './globals.css';
+import localFont from 'next/font/local';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const satoshi = localFont({
+  display: 'swap',
+  src: [
+    {
+      path: '../../public/fonts/satoshi.ttf',
+    },
+  ],
+  variable: '--font-satoshi',
 });
 
 export const metadata: Metadata = {
-  title: "Periskope",
-  description: "A modern chat Application",
+  title: 'chat',
+  description: 'chat',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
- 
-
   return (
     <html lang="en" suppressHydrationWarning={true}>
-      
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={cn(
+          'font-satoshi antialiased bg-gradient-light dark:bg-gradient min-h-screen relative flex flex-col',
+          satoshi.variable
+        )}
       >
-        <Provider>{children}</Provider>
+        <Providers>
+          <main className="h-full w-full">
+            {children}
+          </main>
+        </Providers>
       </body>
     </html>
   );
 }
-
-
-
-
-
